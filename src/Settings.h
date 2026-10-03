@@ -1,0 +1,26 @@
+#pragma once
+
+namespace Settings {
+    inline constexpr int kMin = 1;
+    inline constexpr int kMax = 1000;
+
+    struct Woodcutting {
+        int firewoodPerChop = 2;
+        int chopsPerUse = 3;
+    };
+    struct Mining {
+        int orePerActivation = 1;
+        int activationsPerVein = 3;
+        int strikesPerActivation = 3;
+    };
+    struct Gathering {
+        int plantsGathered = 1;
+    };
+
+    inline Woodcutting wood;
+    inline Mining mining;
+    inline Gathering gathering;
+
+    void Load();
+    void Save();
+}

@@ -1,23 +1,27 @@
+local AUTHOR_NAME = "Pyrolyzed"
+local PRODUCT_NAME = "HarvestTweaks"
+local BEAUTIFUL_NAME = "Harvest Tweaks SKSE"
+
 -- include subprojects
 includes("lib/commonlibsse-ng")
 
 -- set project constants
-set_project("commonlibsse-ng-template")
-set_version("0.0.0")
-set_license("GPL-3.0")
+set_project(PRODUCT_NAME)
+set_version("1.0.0")
+set_license("Unlicense")
 set_languages("c++23")
 set_warnings("allextra")
 
 -- add common rules
-add_rules("mode.debug", "mode.releasedbg")
+add_rules("mode.debug", "mode.release", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
 
 -- define targets
-target("commonlibsse-ng-template")
+target(PRODUCT_NAME)
     add_rules("commonlibsse-ng.plugin", {
-        name = "commonlibsse-ng-template",
-        author = "libxse",
-        description = "SKSE64 plugin template using CommonLibSSE-NG"
+        name = PRODUCT_NAME,
+        author = AUTHOR_NAME,
+        description = BEAUTIFUL_NAME,
     })
 
     -- add src files
