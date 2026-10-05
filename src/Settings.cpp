@@ -46,6 +46,20 @@ namespace {
             return a_default;
         }
     }
+    bool GetBool(const Ini& a_ini, const std::string& a_section, const std::string& a_key, bool a_default) {
+        const auto s = a_ini.find(a_section);
+        if (s == a_ini.end()) return a_default;
+        const auto k = s->second.find(a_key);
+        if (k == s->second.end()) return a_default;
+
+        std::string value = k->second;
+        std::transform(value.begin(), value.end(), value.begin(),
+                    [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+        if (value == "true" || value == "1") return true;
+        if (value == "false" || value == "0") return false;
+    return a_default;
+}
 }
 
 void Settings::Load() {
@@ -53,17 +67,26 @@ void Settings::Load() {
 
     wood.firewoodPerChop = GetInt(ini, "Woodcutting", "iFirewoodPerChop", wood.firewoodPerChop);
     wood.chopsPerUse = GetInt(ini, "Woodcutting", "iChopsPerUse", wood.chopsPerUse);
+    wood.infiniteChops = GetBool(ini, "Woodcutting", "bInfiniteChops", wood.infiniteChops);
 
     mining.orePerActivation = GetInt(ini, "Mining", "iOrePerActivation", mining.orePerActivation);
     mining.activationsPerVein = GetInt(ini, "Mining", "iActivationsPerVein", mining.activationsPerVein);
     mining.strikesPerActivation = GetInt(ini, "Mining", "iStrikesPerActivation", mining.strikesPerActivation);
+    mining.infiniteVeins = GetBool(ini, "Mining", "bInfiniteVeins", mining.infiniteVeins);
 
-    gathering.plantsGathered = GetInt(ini, "Gathering", "iPlantsGathered", gathering.plantsGathered);
+    // gathering.plantsGathered = GetInt(ini, "Gathering", "iPlantsGathered", gathering.plantsGathered);
+    gathering.minPlantsGathered = GetInt(ini, "Gathering", "iMinPlantsGathered", gathering.minPlantsGathered);
+    gathering.maxPlantsGathered = GetInt(ini, "Gathering", "iMaxPlantsGathered", gathering.maxPlantsGathered);
 
     Save();  // creates the file on first run and normalizes out-of-range values
 }
 
 void Settings::Save() {
+    
+    if (gathering.maxPlantsGathered < gathering.minPlantsGathered) {
+        gathering.maxPlantsGathered = gathering.minPlantsGathered;
+    }
+
     std::error_code ec;
     std::filesystem::create_directories(kPath.parent_path(), ec);
 
@@ -75,11 +98,14 @@ void Settings::Save() {
 
     out << "[Woodcutting]\n"
         << "iFirewoodPerChop=" << wood.firewoodPerChop << "\n"
-        << "iChopsPerUse=" << wood.chopsPerUse << "\n\n"
+        << "iChopsPerUse=" << wood.chopsPerUse << "\n"
+        << "bInfiniteChops=" << wood.infiniteChops << "\n\n"
         << "[Mining]\n"
         << "iOrePerActivation=" << mining.orePerActivation << "\n"
         << "iActivationsPerVein=" << mining.activationsPerVein << "\n"
-        << "iStrikesPerActivation=" << mining.strikesPerActivation << "\n\n"
+        << "iStrikesPerActivation=" << mining.strikesPerActivation << "\n"
+        << "bInfiniteVeins=" << mining.infiniteVeins << "\n\n"
         << "[Gathering]\n"
-        << "iPlantsGathered=" << gathering.plantsGathered << "\n";
+        << "iMinPlantsGathered=" << gathering.minPlantsGathered << "\n"
+        << "iMaxPlantsGathered=" << gathering.maxPlantsGathered << "\n";
 }

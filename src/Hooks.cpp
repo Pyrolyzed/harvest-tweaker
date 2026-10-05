@@ -1,5 +1,7 @@
 #include "Hooks.h"
 #include "Settings.h"
+#include <limits>
+#include <random>
 
 namespace {
     using ScriptPtr = RE::BSTSmartPointer<RE::BSScript::Object>;
@@ -42,7 +44,7 @@ namespace {
         if (!obj) return;
 
         const auto perChop = Settings::wood.firewoodPerChop;
-        const auto chops = Settings::wood.chopsPerUse;
+        const auto chops = Settings::wood.infiniteChops ? (std::numeric_limits<int>::max)() : Settings::wood.chopsPerUse;
 
         // the script adds ResourceCount to a counter per chop and stops at
         // MaxResourcePerActivation, so chops = Max / ResourceCount
@@ -57,7 +59,7 @@ namespace {
         if (!obj) return;
 
         SetInt(obj.get(), "ResourceCount", Settings::mining.orePerActivation);
-        SetInt(obj.get(), "ResourceCountTotal", Settings::mining.activationsPerVein);
+        SetInt(obj.get(), "ResourceCountTotal", Settings::mining.infiniteVeins ? (std::numeric_limits<int>::max)() : Settings::mining.activationsPerVein);
         SetInt(obj.get(), "StrikesBeforeCollection", Settings::mining.strikesPerActivation);
         SetInt(obj.get(), "AttackStrikesBeforeCollection", Settings::mining.strikesPerActivation);
         SKSE::log::debug("Mining applied to {:08X}", a_ref->GetFormID());
@@ -73,7 +75,11 @@ namespace {
         auto* actor = a_event->actionRef.get();
         if (!ref || !actor || !actor->IsPlayerRef()) return;
 
-        const auto extra = Settings::gathering.plantsGathered - 1;
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distr(Settings::gathering.minPlantsGathered, Settings::gathering.maxPlantsGathered);
+
+        const auto extra = distr(gen) - 1;
         if (extra <= 0 || IsHarvested(ref)) return;
 
         auto* base = ref->GetBaseObject();
