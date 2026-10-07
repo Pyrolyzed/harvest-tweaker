@@ -49,7 +49,7 @@ namespace {
         // the script adds ResourceCount to a counter per chop and stops at
         // MaxResourcePerActivation, so chops = Max / ResourceCount
         SetInt(obj.get(), "ResourceCount", perChop);
-        SetInt(obj.get(), "MaxResourcePerActivation", perChop * chops);
+        SetInt(obj.get(), "MaxResourcePerActivation", Settings::wood.infiniteChops ? (std::numeric_limits<int>::max)() : chops * perChop);
         SKSE::log::debug("Woodcutting applied: {} per chop, {} chops", perChop, chops);
     }
 
